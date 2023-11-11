@@ -12,7 +12,6 @@ with open('datathon/datathon/dataset/product_data.csv', newline='') as csvfile:
         e = 'C:/Users/Usuari/OneDrive/Documentos/Datathon/aguacate/datathon/' + element.replace('"', "")
         images.append(str(e))
 
-
 print(images[0])
 
 print(images)
