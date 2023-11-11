@@ -16,41 +16,39 @@ with open('datathon/datathon/dataset/product_data.csv', newline='') as csvfile:
         images.append(str(e))
         dades.append(row)
 
-fclip = FashionCLIP('fashion-clip')
+images = images[1:]
+print(images[0])
+dades = dades[1:]
 loaded_embeddings = np.load('image_embeddings.npy')
 
-image_embeddings = fclip.encode_images(["C:/Users/Usuari/OneDrive/Documentos/Datathon/aguacate/datathon/datathon/images/2019_53030677_32.jpg"], batch_size=32)
-ima = image_embeddings[0]
+ima = loaded_embeddings[3]
 distances = []
 for e in loaded_embeddings:
     distances.append(np.dot(ima, e))
 
-cloth = "53090544-50"
-outfit = [1]
+outfit = [3]
 
-def find_tipus(id):
-    for a, l in enumerate(dades):
-        if l[0] == id:
-            return l[8]
-tipus = find_tipus(cloth)
 
 min_dist = np.argsort(distances)
 
 def outfit_complet(outfit):
-    return len(outfit) == 6
-
+    return len(outfit) == 8
 
 def check_append(outfit, m):
+    accessories = 1
     i = True
     for o in outfit:
         if dades[o][8] == dades[m][8]:
-            i = False
+            if dades[m][8] != '"Accesories' or accessories == 2:
+                i = False
+            else:
+                accessories += 1
     return i
 
 
-i = 0
-while outfit_complet(outfit) == False:
-    m = min_dist[i]
+i = 1
+while outfit_complet(outfit) == False and i < len(distances):
+    m = min_dist[-i]
     if check_append(outfit, m):
         outfit.append(m)
     i += 1
@@ -60,7 +58,8 @@ for e in outfit:
 
 outfit_images= [] 
 for e in outfit:
-    outfit_images.append( images[e])
+    if e != 0:
+        outfit_images.append( images[e])
 
 print(outfit)
 gs = gridspec.GridSpec(3, 4, wspace=0.1, hspace=0.2)
