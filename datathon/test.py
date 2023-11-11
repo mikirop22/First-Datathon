@@ -23,7 +23,7 @@ with open('datathon/datathon/dataset/outfit_data.csv', newline='') as csvfile:
 combined = []
 maxlen = 0
 
-for ima in images[1:100]:
+for ima in images[1:1000]:
     for ou in outfits[1:100]:
         if ou[1] == ima[0]:
             seq = ["START"]
@@ -45,7 +45,9 @@ encoded_image = layers.Flatten()(encoded_image)
 # Define the LSTM for sequence generation
 embedding_dim = 50  # Adjust as needed
 sequence_input = keras.Input(shape=(maxlen,))
-tokenizer = Tokenizer()
+
+tokenizer = Tokenizer(filters='!"#$%&()*+,./:;<=>?@[\\]^_`{|}~\t\n')
+
 tokenizer.fit_on_texts([" ".join(seq) for _, seq in combined])
 tokenized_sequence = tokenizer.texts_to_sequences([" ".join(combined[0][1])])
 padded_sequence = pad_sequences(tokenized_sequence, maxlen=maxlen, padding='post', truncating='post')
@@ -66,4 +68,10 @@ model = keras.Model(inputs=[image_input, sequence_input], outputs=output)
 prediction = model.predict([np.expand_dims(image, axis=0), np.array(padded_sequence)])
 
 predicted_class = np.argmax(prediction)
-print("Predicted Class:", predicted_class)
+
+word_index = tokenizer.word_index
+print(word_index)
+index_to_word = {index: word for word, index in word_index.items()}
+predicted_token = index_to_word[predicted_class]
+
+print("Predicted Token:", predicted_token)
