@@ -2,3 +2,4 @@
 datathon/datathon/images/*
 datathon/datathon/dataset/*.csv
 datathon.zip
+*.keras
