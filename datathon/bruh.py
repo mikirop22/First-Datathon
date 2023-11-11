@@ -23,11 +23,11 @@ with open('datathon/datathon/dataset/outfit_data.csv', newline='') as csvfile:
 # Combine data
 combined = []
 maxlen = 0
-for ima in images[1:100]:
-    for ou in outfits[1:200]:
+for ima in images:
+    for ou in outfits:
         if ou[1] == ima[0]:
             seq = ["START"]
-            for ou2 in outfits[1:200]:
+            for ou2 in outfits:
                 if ou[0] == ou2[0]:
                     seq.append(ou2[-1])
             if len(seq) > maxlen:
@@ -140,4 +140,4 @@ for _ in range(5):
 print("Generated Sequence:", current_sequence)
 
 # Save the model
-#model.save('./model.keras')
+model.save('./model.keras')
