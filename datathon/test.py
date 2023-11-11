@@ -25,3 +25,5 @@ with open('datathon/datathon/dataset/combined_data.csv', 'w', newline='') as f:
     write = csv.writer(f,  )
     for row in combined:
         write.writerow(row)
+
+        
