@@ -12,17 +12,14 @@ with open('datathon/datathon/dataset/outfit_data.csv', newline='') as csvfile:
 
 combined = []
 maxlen = 0
-for ima in images[1:2000]:
-    for ou in outfits[1:200]:
+for ima in images:
+    aa = []
+    for ou in outfits:
         if ou[1] == ima[0]:
-            seq = ["START"]
-            for ou2 in outfits[1:200]:
-                if ou[0] == ou2[0]:
-                    seq.append(ou2[-1])
-            seq.append("END")
-            if len(seq) > maxlen:
-                maxlen = len(seq)
-            combined.append([ima[-1], seq])
+            aa.append(ou[0])
+    combined.append(aa)
+
+
 print(combined)
 with open('datathon/datathon/dataset/combined_data.csv', 'w', newline='') as f:
     write = csv.writer(f,  )
