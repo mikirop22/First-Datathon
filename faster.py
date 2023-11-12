@@ -14,16 +14,16 @@ import pyperclip
 ORIGIN_INDEX =  10
 images = []
 dades = []
-with open('datathon/datathon/dataset/dades_processades.csv', newline='') as csvfile:
+with open('C:/Users/USER/Desktop/Datathon/datathon/dataset/dades_reprocessades_bones.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile)
     for row in spamreader:
         element = row[-1]
-        e = 'C:/Users/Usuari/OneDrive/Documentos/Datathon/aguacate/datathon/' + element.replace('"', "")
+        e = 'C:/Users/USER/Desktop/Datathon/' + element.replace('"', "")
         images.append(str(e))
         dades.append(row)
 
 outfit_data = []
-with open('datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
+with open('C:/Users/USER/Desktop/Datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile)
     for row in spamreader:
         outfit_data.append(row)

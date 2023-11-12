@@ -1,12 +1,12 @@
 import pygame
 import sys
 import numpy as np
-from fashion_clip.fashion_clip import FashionCLIP
+#from fashion_clip.fashion_clip import FashionCLIP
 import csv
 from sklearn.metrics.pairwise import cosine_similarity
 
 import numpy as np
-from fashion_clip.fashion_clip import FashionCLIP
+#from fashion_clip.fashion_clip import FashionCLIP
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,16 +18,16 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 ORIGIN_INDEX =  44
 images = []
 dades = []
-with open('datathon/datathon/dataset/dades_processades.csv', newline='') as csvfile:
+with open('C:/Users/USER/Desktop/Datathon/datathon/dataset/dades_reprocessades_bones.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         element = row[-1]
-        e = 'C:/Users/Usuari/OneDrive/Documentos/Datathon/aguacate/datathon/' + element.replace('"', "")
+        e = 'C:/Users/USER/Desktop/Datathon/' + element.replace('"', "")
         images.append(str(e))
         dades.append(row)
 
 outfit_data = []
-with open('datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
+with open('C:/Users/USER/Desktop/Datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         outfit_data.append(row)
