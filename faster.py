@@ -140,9 +140,6 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
     embedding_similarity = np.dot(embedding1, embedding2)
     metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
 
-    meta1 = outfit_embeddings[metaoutfits1[0]] if len(metaoutfits1) > 0 else 0
-    meta2 = outfit_embeddings[metaoutfits2[0]]if len(metaoutfits2) > 0 else 0
-    """
     meta1 = [None]
     for m1 in metaoutfits1:
         if meta1[0] == None:
@@ -159,13 +156,14 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
             meta2 += outfit_embeddings[m2]
     if meta2[0] != None:
         meta2 /= len(metaoutfits2)
+    
     if meta1[0] != None and meta2[0] != None:
+        print(max(meta1), max(meta2))
         outfits_similarity = np.dot(meta1, meta2)
     else:
         outfits_similarity = 0
-    """
-    outfits_similarity = np.dot(meta1, meta2)
-    combined_similarity = 0.2 * embedding_similarity + 0.2*metadata_similarity + outfits_similarity
+    
+    combined_similarity = 0.4 * embedding_similarity + 0.4*metadata_similarity + 0.0000002*outfits_similarity
     return combined_similarity
 
 similarities = []

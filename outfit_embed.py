@@ -70,8 +70,7 @@ for outfit in outfit_data:
 
 for outfit_id, count in outfit_counts.items():
     outfit_embeddings[outfit_id] = outfit_embeddings[outfit_id] / count
-
-print(outfit_embeddings)
+    
 with open('outfit_embeddings.pkl', 'wb') as fp:
     pickle.dump(outfit_embeddings, fp)
     print('dictionary saved successfully to file')
