@@ -1,3 +1,10 @@
+import pygame
+import sys
+import numpy as np
+from fashion_clip.fashion_clip import FashionCLIP
+import csv
+from sklearn.metrics.pairwise import cosine_similarity
+
 import numpy as np
 from fashion_clip.fashion_clip import FashionCLIP
 import csv
@@ -11,7 +18,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 ORIGIN_INDEX =  40
 images = []
 dades = []
-with open('datathon/datathon/dataset/dades_processades.csv', newline='') as csvfile:
+with open('datathon/datathon/dataset/product_data.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         element = row[-1]
@@ -130,8 +137,11 @@ min_dist = np.argsort(similarities)
 def outfit_complet(outfit):
     return len(outfit) == 8
 
-def check_append(outfit, m):
+list_removed = []
+def check_append(outfit, m, list_removed):
     accessories = 1
+    if m in list_removed:
+        return False
     i = True
     for o in outfit:
         if dades[o][8] == dades[m][8]:
@@ -142,7 +152,7 @@ def check_append(outfit, m):
 i = 1
 while outfit_complet(outfit) == False and i < len(similarities):
     m = min_dist[-i]
-    if check_append(outfit, m):
+    if check_append(outfit, m, list_removed):
         outfit.append(m)
     i += 1
 
@@ -174,4 +184,52 @@ for i, image_path in enumerate(outfit_images):
 plt.show()
 
 
+pygame.init()
 
+# Set up screen
+width, height = 800, 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption("Outfit Visualizer")
+
+# Set up fonts
+font = pygame.font.Font(None, 36)
+
+# Function to display outfit images
+def display_outfit(outfit_images):
+    screen.fill((255, 255, 255))
+    for i, image_path in enumerate(outfit_images):
+        img = pygame.image.load(image_path)
+        img = pygame.transform.scale(img, (100, 100))
+        screen.blit(img, (i * 120, 200))
+
+    pygame.display.flip()
+
+old_i = 1
+min_dist = np.argsort(similarities)
+# Main game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = event.pos
+            clicked_index = x // 120  # Assuming each outfit image has a width of 120 pixels
+            if 0 <= clicked_index < len(outfit):
+                removed_item = outfit.pop(clicked_index)
+                list_removed.append(removed_item)
+                print(f"Removed: {dades[removed_item][8]}")
+    i = 0
+    while outfit_complet(outfit) == False and i < len(similarities):
+        m = min_dist[-i]
+        if check_append(outfit, m, list_removed):
+            outfit.append(m)
+        print("a")
+        i += 1
+    old_i = i
+    print(old_i)
+    print(outfit)
+    outfit_images = [images[e] for e in outfit]
+    display_outfit(outfit_images)
+
+    pygame.time.delay(100)  # Add a delay to control the refresh rate
