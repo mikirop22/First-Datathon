@@ -7,7 +7,7 @@
 
 ## Preprocessing product_data
 
-Per realitzar el preprocessament inicial de product_data, es van descartar totes les dades considerades prescindibles i es va suprimir completament la fila corresponent.
+Per realitzar el preprocessament inicial de product_data, es van descartar totes les dades considerades prescindibles i es va suprimir completament la fila corresponent. 
 
 
 
@@ -41,6 +41,17 @@ El codi visualitza aquests vestits en una interfície gràfica, permetent que el
 En resum, aquest codi està dissenyat per generar i recomanar conjunts de roba basats en similituds entre les peces i ofereix una interfície per interactuar amb aquestes recomanacions.
 
 NOTA: Hi ha una secció, la funció calculate_similarity_based_on_metadata() que està parcialment inacabada. Els pesos dels outfits no són del tot correctes i per tant recomanem no tenir-los en compte. Aleshores, escollirà els outfits basant-se en peçes de roba similars i no tindrà en compte els outfits existents.
+
+ACTUALLITZACIÓ FORA DE TEMPS: Per tal d'arreglar els pesos dels outfits, modificar el fitxer outfit_embed.py tal que la línia 71 és
+for outfit_id, count in outfit_counts.items():
+    outfit_embeddings[outfit_id]  = outfit_embeddings[outfit_id] /np.linalg.norm(outfit_embeddings[outfit_id] , ord=2, axis=-1, keepdims=True)
+i al fast.py (línia 166), modificar els pesos tal que:
+combined_similarity = 0.4 * embedding_similarity + 0.4*metadata_similarity + 2*outfits_similarity
+
 ## outfit_embed
 
 Calcula les mitjanes dels embeddings de cada outfit.
+
+## Altres
+
+Mencionar que cal canviar els directoris de les bases de dades, així com executar els pertinents codis per tal de preprocessar-les.
