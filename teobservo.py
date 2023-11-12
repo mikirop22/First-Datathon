@@ -15,7 +15,7 @@ import cv2
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 
-ORIGIN_INDEX =  90
+ORIGIN_INDEX =  44
 images = []
 dades = []
 with open('datathon/datathon/dataset/dades_processades.csv', newline='') as csvfile:
@@ -66,12 +66,8 @@ for outfit in outfit_data:
         outfit_embeddings[outfit_id] = item_embedding
     else:
         outfit_embeddings[outfit_id] += item_embedding
-
+        outfit_embeddings[outfit_id] /= 2
 # Normalize outfit embeddings
-for outfit_id, embedding in outfit_embeddings.items():
-    outfit_embeddings[outfit_id] /= len(embedding)
-
-
 
 metadata = [m[:9] for m in metadata]
 categorical_columns = [0,1,2,3,4,5,6,7,8]
@@ -88,7 +84,6 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
     embedding_similarity = np.dot(embedding1, embedding2)
     # Calculate cosine similarity between metadata
     metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
-    
     meta1 = [None]
     for m1 in metaoutfits1:
         if meta1[0] == None:
@@ -109,13 +104,8 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
         outfits_similarity = np.dot(meta1, meta2)
     else:
         outfits_similarity = float("inf")
-    # Combine similarities (you can adjust the weights based on importance)
     combined_similarity = 0 * embedding_similarity + 0* metadata_similarity + 1* outfits_similarity if outfits_similarity != float("inf") else 0.6 * embedding_similarity + 0.4* metadata_similarity
     return combined_similarity
-
-# Example: Calculate similarity between the first two images based on metadata
-
-
 
 similarities = []
 
@@ -135,27 +125,47 @@ outfit = [ORIGIN_INDEX]
 min_dist = np.argsort(similarities)
 
 
+list_removed = []
+Tipus_roba = []
 
 def outfit_complet(outfit):
-    return len(outfit) == 8
+    return len(Tipus_roba) == 5
 
-list_removed = []
 def check_append(outfit, m, list_removed):
     accessories = 1
     if m in list_removed:
         return False
     i = True
+    if dades[m][8] in Tipus_roba:
+        return False
     for o in outfit:
         if dades[o][8] == dades[m][8]:
             i = False
     return i
 
+for o in outfit:
+    Tipus_roba.append(dades[o][8])
+    if dades[o][8] == '"Dresses':
+        Tipus_roba.append('Tops')
+        Tipus_roba.append('Bottoms')
+    
+    elif dades[o][8] == 'Tops' or dades[o][8] == 'Bottoms':
+        Tipus_roba.append('"Dresses')
 
 i = 1
 while outfit_complet(outfit) == False and i < len(similarities):
     m = min_dist[-i]
     if check_append(outfit, m, list_removed):
         outfit.append(m)
+        Tipus_roba.append(dades[m][8])
+        if dades[o][8] == '"Dresses':
+            if 'Tops' not in Tipus_roba and 'Bottoms' not in Tipus_roba:    
+                Tipus_roba.append('Tops', 'Bottoms')
+        
+        elif dades[o][8] == 'Tops' or dades[o][8] == 'Bottoms':
+            if '"Dresses' not in Tipus_roba:   
+                Tipus_roba.append('"Dresses')
+
     i += 1
 
 
@@ -215,12 +225,21 @@ while True:
             if 0 <= clicked_index < len(outfit):
                 removed_item = outfit.pop(clicked_index)
                 list_removed.append(removed_item)
+                Tipus_roba.remove(dades[removed_item][8])
                 print(f"Removed: {dades[removed_item][8]}")
     i = 0
     while outfit_complet(outfit) == False and i < len(similarities):
         m = min_dist[-i]
         if check_append(outfit, m, list_removed):
             outfit.append(m)
+            Tipus_roba.append(dades[m][8])
+            if dades[o][8] == '"Dresses':
+                if 'Tops' not in Tipus_roba and 'Bottoms' not in Tipus_roba:    
+                    Tipus_roba.append('Tops', 'Bottoms')
+            
+            elif dades[o][8] == 'Tops' or dades[o][8] == 'Bottoms':
+                if '"Dresses' not in Tipus_roba:   
+                    Tipus_roba.append('"Dresses')
         i += 1
     old_i = i
     outfit_images = [images[e] for e in outfit]
