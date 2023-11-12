@@ -156,7 +156,7 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
         outfits_similarity = np.dot(meta1, meta2)
     else:
         outfits_similarity = 0
-    combined_similarity = 0.5 * embedding_similarity + 0.3*metadata_similarity +0.5*outfits_similarity
+    combined_similarity = 0.2 * embedding_similarity + 0.2*metadata_similarity +0.6*outfits_similarity
     return combined_similarity
 
 similarities = []
