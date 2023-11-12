@@ -155,8 +155,8 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
     if meta1[0] != None and meta2[0] != None:
         outfits_similarity = np.dot(meta1, meta2)
     else:
-        outfits_similarity = float("inf")
-    combined_similarity = 0.5 * embedding_similarity + 0.3*metadata_similarity +0.2*outfits_similarity
+        outfits_similarity = 0
+    combined_similarity = 0.5 * embedding_similarity + 0.3*metadata_similarity +0.5*outfits_similarity
     return combined_similarity
 
 similarities = []
@@ -215,7 +215,7 @@ for o in outfit:
     if dades[o][8] == 'Accesories, Swim and Intimate':
         if dades[o][11] == 'Shoes':
             Tipus_roba.add('Shoes')
-        elif dades[o][11] =='Accesories, Swim and Intimate':
+        elif dades[o][8] =='Accesories, Swim and Intimate':
             Tipus_roba.add('Accesories, Swim and Intimate')
     else:
         Tipus_roba.add(dades[o][8])
@@ -250,6 +250,7 @@ while outfit_complet(outfit) == False and i < len(similarities):
     i += 1
 
 
+
 desired_order = ['Dresses, jumpsuits and Complete set', 'Outerwear', 'Tops', 'Bottoms' ,'Accesories, Swim and Intimate']
 outfit.sort(key=lambda x: desired_order.index(dades[x][8]) if dades[x][11] != 'Shoes' else float("inf"))
 
@@ -260,6 +261,12 @@ for e in outfit:
 outfit_complerts = []
 for e in outfit:
     outfit_complerts.append( dades[e])
+
+o_sim = []
+
+for e in outfit:
+        o_sim.append(similarities[e])
+print(o_sim)
 
 
 print(outfit_complerts)
@@ -304,7 +311,8 @@ while True:
                     Tipus_roba.remove(dades[removed_item][8])
                 print(f"Removed: {dades[removed_item][8]}")
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-            pyperclip.copy([dades[ou][0] for ou in outfit])
+            a = " ".join([str(dades[ou][0]) for ou in outfit])
+            pyperclip.copy(a)
             spam = pyperclip.paste()
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             pygame.quit()
@@ -353,34 +361,7 @@ while True:
             onehot_encoded = onehot_encoder.fit_transform(categorical_values)
 
             metadata= onehot_encoded
-            # Function to calculate similarity between images based on metadata
-            def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, metadata2, metaoutfits1, metaoutfits2):
-                embedding_similarity = np.dot(embedding1, embedding2)
-                metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
-
-                meta1 = [None]
-                for m1 in metaoutfits1:
-                    if meta1[0] == None:
-                        meta1 = outfit_embeddings[m1]
-                    else:
-                        meta1 += outfit_embeddings[m1]
-                if meta1[0] != None:
-                    meta1 /= len(metaoutfits1)
-                meta2 = [None]
-                for m2 in metaoutfits2:
-                    if meta2[0]== None:
-                        meta2 = outfit_embeddings[m2]
-                    else:
-                        meta2 += outfit_embeddings[m2]
-                if meta2[0] != None:
-                    meta2 /= len(metaoutfits2)
-                if meta1[0] != None and meta2[0] != None:
-                    outfits_similarity = np.dot(meta1, meta2)
-                else:
-                    outfits_similarity = float("inf")
-                combined_similarity = 0.5 * embedding_similarity + 0.3*metadata_similarity +0.2*outfits_similarity
-                return combined_similarity
-
+            
             similarities = []
             outfit = [ORIGIN_INDEX]
 
@@ -410,34 +391,11 @@ while True:
             list_removed = []
             Tipus_roba = set()
 
-            def outfit_complet(outfit):
-                return len(Tipus_roba) >= 6
-
-            def check_append(outfit, m, list_removed):
-                accessories = 1
-                if m in list_removed:
-                    return False
-                i = True
-                if dades[m][8] in Tipus_roba and dades[m][8] != 'Accesories, Swim and Intimate':
-                    return False
-                elif dades[m][8] == 'Accesories, Swim and Intimate' and  dades[m][11] == 'Shoes' and 'Shoes' not in Tipus_roba:
-                    return True
-                for o in outfit:
-                    if dades[o][8] == dades[m][8]:
-                        if dades[o][8] == 'Accesories, Swim and Intimate':
-                            if dades[o][11] == 'Shoes' and  dades[o][11] == dades[m][11]:
-                                i = False
-                            elif dades[o][11] != 'Shoes':
-                                i = False
-                        else:
-                            i = False
-                return i
-
             for o in outfit:
                 if dades[o][8] == 'Accesories, Swim and Intimate':
                     if dades[o][11] == 'Shoes':
                         Tipus_roba.add('Shoes')
-                    elif dades[o][11] =='Accesories, Swim and Intimate':
+                    elif dades[o][8] =='Accesories, Swim and Intimate':
                         Tipus_roba.add('Accesories, Swim and Intimate')
                 else:
                     Tipus_roba.add(dades[o][8])
