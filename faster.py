@@ -45,10 +45,17 @@ font_small = pygame.font.Font(None, 36)  # Font size for selection screen
 # Function to display outfit images
 def display_outfit(outfit_images):
     screen.fill((255, 255, 255))
+
+    total_width = (width - 100)  # Total available width for the images
+    image_width = total_width / len(outfit_images)
+
+    # Calculate the starting position to center the images
+    start_position = (width - total_width) / 2
+
     for i, image_path in enumerate(outfit_images):
         img = pygame.image.load(image_path)
-        img = pygame.transform.scale(img, ((width-100)/len(outfit_images), (width-100)/len(outfit_images)))  # Increase image scaling
-        screen.blit(img, (i * (width-100)/len(outfit_images), 300))  # Adjust spacing and positioning
+        img = pygame.transform.scale(img, (int(image_width), int(image_width)))  # Cast to int for position
+        screen.blit(img, (start_position + i * image_width, 300))  # Adjust spacing and positioning
 
     pygame.display.flip()
 
@@ -143,25 +150,33 @@ list_removed = []
 Tipus_roba = set()
 
 def outfit_complet(outfit):
-    return len(Tipus_roba) == 6
+    return len(Tipus_roba) >= 6
 
 def check_append(outfit, m, list_removed):
     accessories = 1
     if m in list_removed:
         return False
     i = True
-    if dades[m][8] in Tipus_roba:
+    if dades[m][8] in Tipus_roba and dades[m][8] != 'Accesories, Swim and Intimate':
         return False
+    elif dades[m][8] == 'Accesories, Swim and Intimate' and  dades[m][11] == 'Shoes':
+        return True
     for o in outfit:
         if dades[o][8] == dades[m][8]:
-            i = False
+            if dades[o][8] == 'Accesories, Swim and Intimate':
+                if dades[o][11] == 'Shoes' and  dades[o][11] == dades[m][11]:
+                    i = False
+                elif dades[o][11] != 'Shoes':
+                    i = False
+            else:
+                i = False
     return i
 
 for o in outfit:
     if dades[o][8] == 'Accesories, Swim and Intimate':
         if dades[o][11] == 'Shoes':
             Tipus_roba.add('Shoes')
-        elif 'Accesories, Swim and Intimate':
+        elif dades[o][11] =='Accesories, Swim and Intimate':
             Tipus_roba.add('Accesories, Swim and Intimate')
     else:
         Tipus_roba.add(dades[o][8])
@@ -186,10 +201,9 @@ while outfit_complet(outfit) == False and i < len(similarities):
             Tipus_roba.add('Dresses, jumpsuits and Complete set')
         
         if dades[m][8] == 'Accesories, Swim and Intimate':
-            print(dades[0][11])
-            if dades[o][11] == 'Shoes':
+            if dades[m][11] == 'Shoes':
                 Tipus_roba.add('Shoes')
-            elif 'Accesories, Swim and Intimate':
+            elif dades[m][8] =='Accesories, Swim and Intimate':
                 Tipus_roba.add('Accesories, Swim and Intimate')
         else:
             Tipus_roba.add(dades[m][8])
@@ -198,7 +212,7 @@ while outfit_complet(outfit) == False and i < len(similarities):
 
 
 desired_order = ['Dresses, jumpsuits and Complete set', 'Outerwear', 'Tops', 'Bottoms' ,'Accesories, Swim and Intimate']
-outfit.sort(key=lambda x: desired_order.index(dades[x][8]))
+outfit.sort(key=lambda x: desired_order.index(dades[x][8]) if dades[x][11] != 'Shoes' else float("inf"))
 
 outfit_images= [] 
 for e in outfit:
@@ -232,7 +246,16 @@ while True:
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            clicked_index = x // ((width-100)//len(outfit_images))  # Adjust based on new spacing
+
+            total_width = (width - 100)  # Total available width for the images
+            image_width = total_width / len(outfit_images)
+
+            # Calculate the starting position to center the images
+            total_width = (width - 100)
+            image_width = total_width / len(outfit_images)
+            start_position = (width - total_width) / 2
+
+            clicked_index = int((x - start_position) / image_width)  # Adjust based on new spacing
             if 0 <= clicked_index < len(outfit):
                 removed_item = outfit.pop(clicked_index)
                 list_removed.append(removed_item)
@@ -247,11 +270,9 @@ while True:
             if check_append(outfit, m, list_removed):
                 outfit.append(m)
                 if dades[m][8] == 'Accesories, Swim and Intimate':
-                    print(dades[0][11])
-                    if dades[o][11] == 'Shoes':
-            
+                    if dades[m][11] == 'Shoes':
                         Tipus_roba.add('Shoes')
-                    elif 'Accesories, Swim and Intimate':
+                    elif dades[m][8] == 'Accesories, Swim and Intimate':
                         Tipus_roba.add('Accesories, Swim and Intimate')
                 else:
                     Tipus_roba.add(dades[m][8])
@@ -263,7 +284,7 @@ while True:
                     Tipus_roba.add('Dresses, jumpsuits and Complete set')
             i += 1
         old_i = i
-    outfit.sort(key=lambda x: desired_order.index(dades[x][8]))
+    outfit.sort(key=lambda x: desired_order.index(dades[x][8]) if dades[x][11] != 'Shoes' else float("inf"))
     outfit_images = [images[e] for e in outfit]
     display_outfit(outfit_images)
 
