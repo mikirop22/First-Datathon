@@ -40,6 +40,7 @@ El codi visualitza aquests vestits en una interfície gràfica, permetent que el
 
 En resum, aquest codi està dissenyat per generar i recomanar conjunts de roba basats en similituds entre les peces i ofereix una interfície per interactuar amb aquestes recomanacions.
 
+NOTA: Hi ha una secció, la funció calculate_similarity_based_on_metadata() que està parcialment inacabada. Els pesos dels outfits no són del tot correctes i per tant recomanem no tenir-los en compte. Aleshores, escollirà els outfits basant-se en peçes de roba similars i no tindrà en compte els outfits existents.
 ## outfit_embed
 
 Calcula les mitjanes dels embeddings de cada outfit.
