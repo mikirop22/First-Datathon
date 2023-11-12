@@ -66,12 +66,8 @@ for outfit in outfit_data:
         outfit_embeddings[outfit_id] = item_embedding
     else:
         outfit_embeddings[outfit_id] += item_embedding
-
+        outfit_embeddings[outfit_id] /= 2
 # Normalize outfit embeddings
-for outfit_id, embedding in outfit_embeddings.items():
-    outfit_embeddings[outfit_id] /= len(embedding)
-
-
 
 metadata = [m[:9] for m in metadata]
 categorical_columns = [0,1,2,3,4,5,6,7,8]
@@ -88,7 +84,6 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
     embedding_similarity = np.dot(embedding1, embedding2)
     # Calculate cosine similarity between metadata
     metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
-    
     meta1 = [None]
     for m1 in metaoutfits1:
         if meta1[0] == None:
@@ -109,13 +104,8 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
         outfits_similarity = np.dot(meta1, meta2)
     else:
         outfits_similarity = float("inf")
-    # Combine similarities (you can adjust the weights based on importance)
     combined_similarity = 0 * embedding_similarity + 0* metadata_similarity + 1* outfits_similarity if outfits_similarity != float("inf") else 0.6 * embedding_similarity + 0.4* metadata_similarity
     return combined_similarity
-
-# Example: Calculate similarity between the first two images based on metadata
-
-
 
 similarities = []
 
