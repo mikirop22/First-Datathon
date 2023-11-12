@@ -1,62 +1,45 @@
 # UPC Datathon 2023
 # Fashion Compatibility Challenge <img src="resources/icon.png" align="right" height=100/>
 
-The main file is faster.py. That  is the one that contains the program.
-
-To be able to execute it, you may need other csv that can be obtained using the different files.
-
 ## Overview
 
-<img src="resources/outfit.png">
+## Explicació codi
 
-This challenge aims to create a model capable of generating outfit recommendations based on a given initial product. Fashion matching is complex due to the nuanced patterns and visual details that dictate whether products pair well together, often going beyond mere product metadata. For instance, it's not straightforward to determine if a violet satin dress, white sandals, and a silver chic bag make a good outfit without seeing the items.
- 
-The essence of a good outfit often lies in the complementary nature of different products rather than their similarity. The task here is to extract and model these visual features to predict matching products effectively. One approach to address this is the "Fill in the Blank" task, where the goal is to predict a missing item in a given outfit from a list of candidate products. This task serves as a stepping stone towards generating complete outfits from a single product. However, participants are encouraged to explore other innovative solutions to this challenge as well.
- 
-Participants will have the opportunity to work with real outfits curated by stylists and fashion experts at MANGO and exhibit their proficiency in navigating a software development environment while adhering to strict deadlines and maintaining performance under a high-pressure scenario.
+## Preprocessing product_data
 
-## Brief Data Overview
-Participants will access two datasets and images.
-
-1. **Product Data (`product_data.csv`)**: This dataset includes comprehensive attributes of fashion items such as identifiers, colors, materials, product types, and the file path to the associated image.
-2. **Outfit Data (`outfit_data.csv`)**: Contains links between fashion items and outfits, identifying which items are paired together.
-Both datasets provide a wealth of features to analyze fashion item characteristics and their combinations in outfits. Refer to the [Dataset description](datathon/dataset/dataset_description.md) for detailed information on dataset fields, dataset relationships and how to download the data.
+Per realitzar el preprocessament inicial de product_data, es van descartar totes les dades considerades prescindibles i es va suprimir completament la fila corresponent.
 
 
 
-## Objectives
-* Develop a model to effectively predict matching products based on tabular/visual features.
-* Exhibit creativity in approaching the fashion compatibility challenge.
-* Demonstrate the applicability and scalability of the proposed solution through a proof-of-concept.
- 
-## Evaluation
-While the evaluation will not follow a specific performance metric, evaluation will be based on:
+## Outfit_data
 
-1. A 10-minute elevator pitch, showcasing their proof-of-concept to a panel of experts with diverse experience in data science, machine learning, and fashion. Teams are expected to present at least 5 newly created outfits based on the given products in the dataset. The evaluation will focus on the creativity, complexity, applicability of the proposed solution and the team's communication abilities.
-2. The team's Github repository - showcasing:
-   - Code quality
-   - Documentation 
-   - Use of Version Control & Branching strategies
- 
-## Considerations
-* Enough time should be allocated for the final presentation as effective communication is crucial for this challenge. Preparing a demo or utilizing a UI like [Streamlit](https://streamlit.io/) can significantly aid in demonstrating your proof-of-concept.
-* Participants are free to enrich the dataset with external resources; however, pay attention to the licenses of data and/or models you utilize.
+Durant el procés de preprocessament de les dades d'outfit_data, es van excloure els elements dels conjunts de vestuari que havien sigut eliminats durant la manipulació prèvia de les dades de producte.
 
-## Get started
-1. Fork this [Github Datathon Challenge](https://github.com/data-science-mango/datathon-2023-fashion-compatibility) repository
-2. Download the data as a `.zip` file from the following [link](https://mng-datathon-upc.s3.eu-west-1.amazonaws.com/datathon.zip) and unzip it in the forked repository
-3. Read the [Dataset description](datathon/dataset/dataset_description.md)
+Per dur a terme aquest procés, es va obrir el fitxer .csv de product_data i es van conservar les seves dades. Posteriorment, es va accedir al conjunt de dades d'outfit_data. Seguidament, es va identificar els productes que no pertanyien a cap conjunt de vestuari i es van eliminar aquestes peces de roba.
 
-## Who we are
-With a rich legacy rooted in Barcelona, MANGO captivates the global fashion scene through its innovative blend of design and technology, offering a seamless fusion of online and in-store shopping experiences across over 115 markets, embodying the essence of taking fashion further.
 
-## Organizing Committee
-- Andrea Coloma
-- Cristina Ruiz-Larrea
-- Adrian Martinez Lopez
-- Judith Beltran Lopez
-- Sandra Millet Salvador
-- Lucas Anton Pastur
-- Matthias Brenninkmeijer
+## Repreprocessing product_data
 
-Best of luck, and happy coding!
+Finalment, per optimitzar la classificació dels diferents tipus de peces de vestuari, es va realitzar una modificació a la columna "des_product_category", unificant tots els tipus de calçat sota una única categoria anomenada 'shoes'.
+
+
+## new_outfit.py
+
+Crea la nova base de dades de l'outfit preprocessada.
+Aquest script pren dades d'imatges i dades d'ataviaments des de dos arxius CSV separats. Extreu les rutes de les imatges, processant-les per emmagatzemar-les. Després, recull les dades dels atuendos i les relaciona amb les imatges disponibles. Finalment, crea un nou arxiu CSV amb aquestes dades preparades per a un ús posterior.
+
+## faster.py
+
+La secció inicial del codi carrega dades d'arxius CSV i les prepara per a l'anàlisi. Les columnes categòriques es converteixen en valors numèrics per calcular similituds. La funció `calculate_similarity_based_on_metadata` mesura la similitud entre imatges i els seus metadades, incloent la similitud del conjunt d'indumentària.
+
+A continuació, el codi ordena les similituds i analitza la semblança entre les imatges. Després, es genera un procés per a crear vestits amb diferents peces de roba. Aquest algoritme sembla garantir la diversitat de peces en el vestit, evitant repeticions i prioritzant la inclusió de diferents tipus de roba.
+
+Després d'això, el codi organitza el vestit seguint una llista de categories de roba. La selecció i organització de les peces es basa en aquest ordre específic.
+
+El codi visualitza aquests vestits en una interfície gràfica, permetent que els usuaris interactuïn amb la recomanació. Així, l'usuari pot treure elements del vestit i el programa actualitzarà la recomanació en consequència. A més, ofereix opcions per copiar i enganxar el vestit recomanat.
+
+En resum, aquest codi està dissenyat per generar i recomanar conjunts de roba basats en similituds entre les peces i ofereix una interfície per interactuar amb aquestes recomanacions.
+
+## outfit_embed
+
+Calcula les mitjanes dels embeddings de cada outfit.
