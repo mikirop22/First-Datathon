@@ -14,16 +14,16 @@ import pyperclip
 ORIGIN_INDEX =  10
 images = []
 dades = []
-with open('C:/Users/USER/Desktop/Datathon/datathon/dataset/dades_reprocessades_bones.csv', newline='') as csvfile:
+with open('C:/Users/Usuari/OneDrive/Documentos/Datathon/aguacate/datathon/datathon/dataset/dades_reprocessades_bones.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile)
     for row in spamreader:
         element = row[-1]
-        e = 'C:/Users/USER/Desktop/Datathon/' + element.replace('"', "")
+        e = 'C:/Users/Usuari/OneDrive/Documentos/Datathon/aguacate/datathon/' + element.replace('"', "")
         images.append(str(e))
         dades.append(row)
 
 outfit_data = []
-with open('C:/Users/USER/Desktop/Datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
+with open('C:/Users/Usuari/OneDrive/Documentos/Datathon/aguacate/datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile)
     for row in spamreader:
         outfit_data.append(row)
@@ -32,6 +32,8 @@ import pickle
 
 with open('outfit_embeddings.pkl', 'rb') as fp:
     outfit_embeddings = pickle.load(fp)
+
+
 
 images = images[1:]
 dades = dades[1:]
@@ -119,6 +121,8 @@ print(selected_item)
 # Load your image embeddings
 image_embeddings = np.load('image_embeddings_prep.npy')
 
+print(image_embeddings)
+
 print("hola")
 outfit_data = outfit_data[1:]
 metadata = dades
@@ -136,6 +140,9 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
     embedding_similarity = np.dot(embedding1, embedding2)
     metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
 
+    meta1 = outfit_embeddings[metaoutfits1[0]] if len(metaoutfits1) > 0 else 0
+    meta2 = outfit_embeddings[metaoutfits2[0]]if len(metaoutfits2) > 0 else 0
+    """
     meta1 = [None]
     for m1 in metaoutfits1:
         if meta1[0] == None:
@@ -156,7 +163,9 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
         outfits_similarity = np.dot(meta1, meta2)
     else:
         outfits_similarity = 0
-    combined_similarity = 0.2 * embedding_similarity + 0.2*metadata_similarity +0.6*outfits_similarity
+    """
+    outfits_similarity = np.dot(meta1, meta2)
+    combined_similarity = 0.2 * embedding_similarity + 0.2*metadata_similarity + outfits_similarity
     return combined_similarity
 
 similarities = []

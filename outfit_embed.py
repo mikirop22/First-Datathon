@@ -41,7 +41,7 @@ for ima in dades:
     combined.append(aa)
 meta_outfits = combined
 
-with open('meta_outfits.csv', 'w') as f:
+with open('meta_outfits.csv', 'w', newline='') as f:
      
     # using csv.writer method from CSV package
     write = csv.writer(f)
@@ -49,9 +49,12 @@ with open('meta_outfits.csv', 'w') as f:
         write.writerow(meta)
 
 #Outfit mean embedings:
+import numpy as np
+
 outfit_embeddings = {}
 outfit_counts = {}
 codis = [m[0] for m in metadata]
+
 # Calculate the average embedding for each outfit
 for outfit in outfit_data:
     outfit_id, item_id = outfit
@@ -64,10 +67,11 @@ for outfit in outfit_data:
     else:
         outfit_embeddings[outfit_id] += item_embedding
         outfit_counts[outfit_id] += 1
-# Normalize outfit embeddings
-for outfit_id, embedding in outfit_embeddings.items():
-    outfit_embeddings[outfit_id] /= outfit_counts[outfit_id]
 
+for outfit_id, count in outfit_counts.items():
+    outfit_embeddings[outfit_id] = outfit_embeddings[outfit_id] / count
+
+print(outfit_embeddings)
 with open('outfit_embeddings.pkl', 'wb') as fp:
     pickle.dump(outfit_embeddings, fp)
     print('dictionary saved successfully to file')
