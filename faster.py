@@ -8,7 +8,8 @@ import matplotlib.gridspec as gridspec
 import cv2
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 import pickle
-
+import random
+import pyperclip
 
 ORIGIN_INDEX =  10
 images = []
@@ -89,9 +90,11 @@ def display_selection_screen(images):
 
     pygame.display.flip()
 
+step = random.randint(1, len(images)-8)
 # Get the initial outfit selection from the user
-initial_images = images[:30]  # Display the first 5 images on the selection screen
+initial_images = images[step:step+7]  # Display the first 5 images on the selection screen
 display_selection_screen(initial_images)
+
 
 selected_item = None
 while selected_item is None:
@@ -105,12 +108,13 @@ while selected_item is None:
             if 0 <= clicked_index < len(initial_images):
                 selected_item = initial_images[clicked_index]
                 display_loading_screen()
+                ORIGIN_INDEX = clicked_index + step
                 pygame.display.flip()
                 print("Loading...")
                 break
 
 print(selected_item)
-ORIGIN_INDEX = clicked_index
+
 
 # Load your image embeddings
 image_embeddings = np.load('image_embeddings_prep.npy')
@@ -152,7 +156,7 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
         outfits_similarity = np.dot(meta1, meta2)
     else:
         outfits_similarity = float("inf")
-    combined_similarity = 0.3 * embedding_similarity + 0.3*metadata_similarity +0.4*outfits_similarity
+    combined_similarity = 0.5 * embedding_similarity + 0.3*metadata_similarity +0.2*outfits_similarity
     return combined_similarity
 
 similarities = []
@@ -299,6 +303,202 @@ while True:
                 else:
                     Tipus_roba.remove(dades[removed_item][8])
                 print(f"Removed: {dades[removed_item][8]}")
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+            pyperclip.copy([dades[ou][0] for ou in outfit])
+            spam = pyperclip.paste()
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            pygame.quit()
+            sys.exit()
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_BACKSPACE:
+            # Reset to the initial screen
+            step = random.randint(1, len(images) - 8)
+            initial_images = images[step:step + 7]
+            selected_item = None
+            display_selection_screen(initial_images)
+            outfit = [step + clicked_index]  # Assuming clicked_index is still valid
+            list_removed = []
+            Tipus_roba = set()
+            selected_item = None
+            while selected_item is None:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        x, y = event.pos
+                        clicked_index = x // 170
+                        if 0 <= clicked_index < len(initial_images):
+                            selected_item = initial_images[clicked_index]
+                            display_loading_screen()
+                            ORIGIN_INDEX = clicked_index + step
+                            pygame.display.flip()
+                            print("Loading...")
+                            break
+
+            print(selected_item)
+
+
+            # Load your image embeddings
+            image_embeddings = np.load('image_embeddings_prep.npy')
+
+            print("hola")
+            outfit_data = outfit_data[1:]
+            metadata = dades
+            metadata = [m[:9] for m in metadata]
+            categorical_columns = [0,1,2,3,4,5,6,7,8]
+
+            # Extract the values from the categorical columns
+            categorical_values = [[entry[col] for col in categorical_columns] for entry in metadata]
+            onehot_encoder = OneHotEncoder(sparse=False)
+            onehot_encoded = onehot_encoder.fit_transform(categorical_values)
+
+            metadata= onehot_encoded
+            # Function to calculate similarity between images based on metadata
+            def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, metadata2, metaoutfits1, metaoutfits2):
+                embedding_similarity = np.dot(embedding1, embedding2)
+                metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
+
+                meta1 = [None]
+                for m1 in metaoutfits1:
+                    if meta1[0] == None:
+                        meta1 = outfit_embeddings[m1]
+                    else:
+                        meta1 += outfit_embeddings[m1]
+                if meta1[0] != None:
+                    meta1 /= len(metaoutfits1)
+                meta2 = [None]
+                for m2 in metaoutfits2:
+                    if meta2[0]== None:
+                        meta2 = outfit_embeddings[m2]
+                    else:
+                        meta2 += outfit_embeddings[m2]
+                if meta2[0] != None:
+                    meta2 /= len(metaoutfits2)
+                if meta1[0] != None and meta2[0] != None:
+                    outfits_similarity = np.dot(meta1, meta2)
+                else:
+                    outfits_similarity = float("inf")
+                combined_similarity = 0.5 * embedding_similarity + 0.3*metadata_similarity +0.2*outfits_similarity
+                return combined_similarity
+
+            similarities = []
+            outfit = [ORIGIN_INDEX]
+
+            meta_outfits = []
+            with open('meta_outfits.csv', newline='') as csvfile:
+                spamreader = csv.reader(csvfile)
+                for row in spamreader:
+                    meta_outfits.append(row)
+
+
+            for e in range(len(image_embeddings)):
+                metadata_similarity_score = calculate_similarity_based_on_metadata(
+                image_embeddings[ORIGIN_INDEX],
+                image_embeddings[e],
+                metadata[ORIGIN_INDEX],
+                metadata[e],
+                meta_outfits[ORIGIN_INDEX],
+                meta_outfits[e]
+            )
+                similarities.append(metadata_similarity_score)
+
+
+
+            min_dist = np.argsort(similarities)
+
+
+            list_removed = []
+            Tipus_roba = set()
+
+            def outfit_complet(outfit):
+                return len(Tipus_roba) >= 6
+
+            def check_append(outfit, m, list_removed):
+                accessories = 1
+                if m in list_removed:
+                    return False
+                i = True
+                if dades[m][8] in Tipus_roba and dades[m][8] != 'Accesories, Swim and Intimate':
+                    return False
+                elif dades[m][8] == 'Accesories, Swim and Intimate' and  dades[m][11] == 'Shoes' and 'Shoes' not in Tipus_roba:
+                    return True
+                for o in outfit:
+                    if dades[o][8] == dades[m][8]:
+                        if dades[o][8] == 'Accesories, Swim and Intimate':
+                            if dades[o][11] == 'Shoes' and  dades[o][11] == dades[m][11]:
+                                i = False
+                            elif dades[o][11] != 'Shoes':
+                                i = False
+                        else:
+                            i = False
+                return i
+
+            for o in outfit:
+                if dades[o][8] == 'Accesories, Swim and Intimate':
+                    if dades[o][11] == 'Shoes':
+                        Tipus_roba.add('Shoes')
+                    elif dades[o][11] =='Accesories, Swim and Intimate':
+                        Tipus_roba.add('Accesories, Swim and Intimate')
+                else:
+                    Tipus_roba.add(dades[o][8])
+                if dades[o][8] == 'Dresses, jumpsuits and Complete set':
+                    Tipus_roba.add('Tops')
+                    Tipus_roba.add('Bottoms')
+                
+                elif dades[o][8] == 'Tops' or dades[o][8] == 'Bottoms':
+                    Tipus_roba.add('Dresses, jumpsuits and Complete set')
+
+            i = 1
+            while outfit_complet(outfit) == False and i < len(similarities):
+                m = min_dist[-i]
+                if check_append(outfit, m, list_removed):
+                    outfit.append(m)
+                    
+                    if dades[m][8] == 'Dresses, jumpsuits and Complete set':
+                        Tipus_roba.add('Tops')
+                        Tipus_roba.add('Bottoms')
+                    
+                    elif dades[m][8] == 'Tops' or dades[m][8] == 'Bottoms':
+                        Tipus_roba.add('Dresses, jumpsuits and Complete set')
+                    
+                    if dades[m][8] == 'Accesories, Swim and Intimate':
+                        if dades[m][11] == 'Shoes':
+                            Tipus_roba.add('Shoes')
+                        elif dades[m][8] =='Accesories, Swim and Intimate':
+                            Tipus_roba.add('Accesories, Swim and Intimate')
+                    else:
+                        Tipus_roba.add(dades[m][8])
+
+                i += 1
+
+
+            desired_order = ['Dresses, jumpsuits and Complete set', 'Outerwear', 'Tops', 'Bottoms' ,'Accesories, Swim and Intimate']
+            outfit.sort(key=lambda x: desired_order.index(dades[x][8]) if dades[x][11] != 'Shoes' else float("inf"))
+
+            outfit_images= [] 
+            for e in outfit:
+                outfit_images.append( images[e])
+
+            outfit_complerts = []
+            for e in outfit:
+                outfit_complerts.append( dades[e])
+
+
+            print(outfit_complerts)
+
+            gs = gridspec.GridSpec(3, 4, wspace=0.1, hspace=0.2)
+
+            # Loop through the images and plot them
+            for i, image_path in enumerate(outfit_images):
+                img = cv2.imread(image_path)
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # Convert BGR to RGB
+                ax = plt.subplot(gs[i])
+                ax.imshow(img)
+                ax.set_title(f'Image {i + 1}')
+                ax.axis('off')
+
+            old_i = 1
+            min_dist = np.argsort(similarities)
         i = 1
         while outfit_complet(outfit) == False and i < len(similarities):
             m = min_dist[-i]
@@ -322,5 +522,5 @@ while True:
     outfit.sort(key=lambda x: desired_order.index(dades[x][8]) if dades[x][11] != 'Shoes' else float("inf"))
     outfit_images = [images[e] for e in outfit]
     display_outfit(outfit_images)
-
+    pygame.event.pump()
     pygame.time.delay(30)
