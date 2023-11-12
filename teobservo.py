@@ -15,7 +15,7 @@ import cv2
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 
-ORIGIN_INDEX =  90
+ORIGIN_INDEX =  44
 images = []
 dades = []
 with open('datathon/datathon/dataset/dades_processades.csv', newline='') as csvfile:
@@ -135,27 +135,47 @@ outfit = [ORIGIN_INDEX]
 min_dist = np.argsort(similarities)
 
 
+list_removed = []
+Tipus_roba = []
 
 def outfit_complet(outfit):
-    return len(outfit) == 8
+    return len(Tipus_roba) == 5
 
-list_removed = []
 def check_append(outfit, m, list_removed):
     accessories = 1
     if m in list_removed:
         return False
     i = True
+    if dades[m][8] in Tipus_roba:
+        return False
     for o in outfit:
         if dades[o][8] == dades[m][8]:
             i = False
     return i
 
+for o in outfit:
+    Tipus_roba.append(dades[o][8])
+    if dades[o][8] == '"Dresses':
+        Tipus_roba.append('Tops')
+        Tipus_roba.append('Bottoms')
+    
+    elif dades[o][8] == 'Tops' or dades[o][8] == 'Bottoms':
+        Tipus_roba.append('"Dresses')
 
 i = 1
 while outfit_complet(outfit) == False and i < len(similarities):
     m = min_dist[-i]
     if check_append(outfit, m, list_removed):
         outfit.append(m)
+        Tipus_roba.append(dades[m][8])
+        if dades[o][8] == '"Dresses':
+            if 'Tops' not in Tipus_roba and 'Bottoms' not in Tipus_roba:    
+                Tipus_roba.append('Tops', 'Bottoms')
+        
+        elif dades[o][8] == 'Tops' or dades[o][8] == 'Bottoms':
+            if '"Dresses' not in Tipus_roba:   
+                Tipus_roba.append('"Dresses')
+
     i += 1
 
 
@@ -215,12 +235,21 @@ while True:
             if 0 <= clicked_index < len(outfit):
                 removed_item = outfit.pop(clicked_index)
                 list_removed.append(removed_item)
+                Tipus_roba.remove(dades[removed_item][8])
                 print(f"Removed: {dades[removed_item][8]}")
     i = 0
     while outfit_complet(outfit) == False and i < len(similarities):
         m = min_dist[-i]
         if check_append(outfit, m, list_removed):
             outfit.append(m)
+            Tipus_roba.append(dades[m][8])
+            if dades[o][8] == '"Dresses':
+                if 'Tops' not in Tipus_roba and 'Bottoms' not in Tipus_roba:    
+                    Tipus_roba.append('Tops', 'Bottoms')
+            
+            elif dades[o][8] == 'Tops' or dades[o][8] == 'Bottoms':
+                if '"Dresses' not in Tipus_roba:   
+                    Tipus_roba.append('"Dresses')
         i += 1
     old_i = i
     outfit_images = [images[e] for e in outfit]
