@@ -15,10 +15,10 @@ import cv2
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 
-ORIGIN_INDEX =  40
+ORIGIN_INDEX =  90
 images = []
 dades = []
-with open('datathon/datathon/dataset/product_data.csv', newline='') as csvfile:
+with open('datathon/datathon/dataset/dades_processades.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         element = row[-1]
@@ -27,20 +27,19 @@ with open('datathon/datathon/dataset/product_data.csv', newline='') as csvfile:
         dades.append(row)
 
 outfit_data = []
-with open('datathon/datathon/dataset/outfit_data.csv', newline='') as csvfile:
+with open('datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         outfit_data.append(row)
 
 images = images[1:]
 dades = dades[1:]
-loaded_embeddings = np.load('image_embeddings.npy')
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load your image embeddings
-image_embeddings = np.load('image_embeddings.npy')
+image_embeddings = np.load('image_embeddings_prep.npy')
 
 outfit_data = outfit_data[1:]
 metadata = dades
@@ -83,7 +82,6 @@ onehot_encoder = OneHotEncoder(sparse=False)
 onehot_encoded = onehot_encoder.fit_transform(categorical_values)
 
 metadata= onehot_encoded
-print(metadata[0])
 # Function to calculate similarity between images based on metadata
 def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, metadata2, metaoutfits1, metaoutfits2):
     # For simplicity, use cosine similarity
@@ -97,18 +95,22 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
             meta1 = outfit_embeddings[m1]
         else:
             meta1 += outfit_embeddings[m1]
-    meta1 /= len(metaoutfits1)
+    if meta1[0] != None:
+        meta1 /= len(metaoutfits1)
     meta2 = [None]
     for m2 in metaoutfits2:
         if meta2[0]== None:
             meta2 = outfit_embeddings[m2]
         else:
             meta2 += outfit_embeddings[m2]
-    meta2 /= len(metaoutfits2)
-    outfits_similarity = np.dot(meta1, meta2)
-    
+    if meta2[0] != None:
+        meta2 /= len(metaoutfits2)
+    if meta1[0] != None and meta2[0] != None:
+        outfits_similarity = np.dot(meta1, meta2)
+    else:
+        outfits_similarity = float("inf")
     # Combine similarities (you can adjust the weights based on importance)
-    combined_similarity = 0.5 * embedding_similarity + 0.1* metadata_similarity + 0.4* outfits_similarity if outfits_similarity != float("inf") else 0.6 * embedding_similarity + 0.4* metadata_similarity
+    combined_similarity = 0 * embedding_similarity + 0* metadata_similarity + 1* outfits_similarity if outfits_similarity != float("inf") else 0.6 * embedding_similarity + 0.4* metadata_similarity
     return combined_similarity
 
 # Example: Calculate similarity between the first two images based on metadata
@@ -117,7 +119,7 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
 
 similarities = []
 
-for e in range(len(loaded_embeddings)):
+for e in range(len(image_embeddings)):
     metadata_similarity_score = calculate_similarity_based_on_metadata(
     image_embeddings[ORIGIN_INDEX],
     image_embeddings[e],
@@ -156,8 +158,6 @@ while outfit_complet(outfit) == False and i < len(similarities):
         outfit.append(m)
     i += 1
 
-for e in outfit:
-    print(dades[e][8])
 
 outfit_images= [] 
 for e in outfit:
@@ -167,11 +167,8 @@ outfit_complerts = []
 for e in outfit:
     outfit_complerts.append( dades[e])
 
-print(outfit)
 gs = gridspec.GridSpec(3, 4, wspace=0.1, hspace=0.2)
 
-print(outfit_images)
-print(outfit_complerts)
 # Loop through the images and plot them
 for i, image_path in enumerate(outfit_images):
     img = cv2.imread(image_path)
@@ -224,12 +221,9 @@ while True:
         m = min_dist[-i]
         if check_append(outfit, m, list_removed):
             outfit.append(m)
-        print("a")
         i += 1
     old_i = i
-    print(old_i)
-    print(outfit)
     outfit_images = [images[e] for e in outfit]
     display_outfit(outfit_images)
 
-    pygame.time.delay(100)  # Add a delay to control the refresh rate
+    pygame.time.delay(30)  # Add a delay to control the refresh rate
