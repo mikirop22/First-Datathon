@@ -1,6 +1,10 @@
 # UPC Datathon 2023
 # Fashion Compatibility Challenge <img src="resources/icon.png" align="right" height=100/>
 
+The main file is faster.py. That  is the one that contains the program.
+
+To be able to execute it, you may need other csv that can be obtained using the different files.
+
 ## Overview
 
 <img src="resources/outfit.png">
