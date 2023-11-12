@@ -7,7 +7,6 @@ import matplotlib.gridspec as gridspec
 import cv2
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
-
 ORIGIN_INDEX =  59
 images = []
 dades = []
@@ -15,7 +14,7 @@ with open('C:/Users/Usuario/OneDrive/Escritorio/Datathon/datathon/dataset/dades_
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         element = row[-1]
-        e = 'C:/Users/Usuario/OneDrive/Escritorio/Datathon/' + element.replace('"', "")
+        e = 'C:/Users/USER/Desktop/Datathon/' + element.replace('"', "")
         images.append(str(e))
         dades.append(row)
 
@@ -64,7 +63,6 @@ for outfit_id, embedding in outfit_embeddings.items():
     outfit_embeddings[outfit_id] /= len(embedding)
 
 
-
 metadata = [m[:9] for m in metadata]
 categorical_columns = [0,1,2,3,4,5,6,7,8]
 
@@ -103,11 +101,10 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
     else:
         outfits_similarity = float("inf")
     # Combine similarities (you can adjust the weights based on importance)
-    combined_similarity = 0.1 * embedding_similarity + 0.1* metadata_similarity + 0.8* outfits_similarity if outfits_similarity != float("inf") else 0.6 * embedding_similarity + 0.4* metadata_similarity
+    combined_similarity = 0.1 * embedding_similarity + 0.1* metadata_similarity + 0.8* outfits_similarity if outfits_similarity != float("inf") else 0.8 * embedding_similarity + 0.2* metadata_similarity
     return combined_similarity
 
 # Example: Calculate similarity between the first two images based on metadata
-
 
 
 similarities = []
@@ -122,7 +119,6 @@ for e in range(len(image_embeddings)):
     meta_outfits[e]
 )
     similarities.append(metadata_similarity_score)
-
 
 outfit = [ORIGIN_INDEX]
 min_dist = np.argsort(similarities)
@@ -193,6 +189,3 @@ for i, image_path in enumerate(outfit_images):
     ax.axis('off')
 
 plt.show()
-
-
-
