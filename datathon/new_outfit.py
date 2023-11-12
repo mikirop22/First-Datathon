@@ -13,8 +13,8 @@ outfit_data = []
 with open('datathon/datathon/dataset/outfit_data.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
-        if row[1] in [d[0] for d in dades]:
-            outfit_data.append(row)
+        if row[1].replace('"', "") in [d[0] for d in dades]:
+            outfit_data.append([row[0], row[1].replace('"', "")])
 
 with open('datathon/datathon/dataset/outfit_prep_data.csv', 'w', newline='') as f:
     write = csv.writer(f,  )
