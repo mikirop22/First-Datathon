@@ -20,20 +20,18 @@ with open('datathon/datathon/dataset/dades_processades.csv', newline='') as csvf
         dades.append(row)
 
 outfit_data = []
-with open('datathon/datathon/dataset/outfit_data.csv', newline='') as csvfile:
+with open('datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         outfit_data.append(row)
 
 images = images[1:]
 dades = dades[1:]
-loaded_embeddings = np.load('image_embeddings.npy')
-
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load your image embeddings
-image_embeddings = np.load('image_embeddings.npy')
+image_embeddings = np.load('image_embeddings_prep.npy')
 
 outfit_data = outfit_data[1:]
 metadata = dades
@@ -84,22 +82,26 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
     # Calculate cosine similarity between metadata
     metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
     
-    meta1 = [None]
+    meta1 = None
     for m1 in metaoutfits1:
-        if meta1[0] == None:
+        if meta1 == None:
             meta1 = outfit_embeddings[m1]
         else:
             meta1 += outfit_embeddings[m1]
-    meta1 /= len(metaoutfits1)
-    meta2 = [None]
+    if meta1 != None:
+        meta1 /= len(metaoutfits1)
+    meta2 = None
     for m2 in metaoutfits2:
-        if meta2[0]== None:
+        if meta2== None:
             meta2 = outfit_embeddings[m2]
         else:
             meta2 += outfit_embeddings[m2]
-    meta2 /= len(metaoutfits2)
-    outfits_similarity = np.dot(meta1, meta2)
-    
+    if meta2 != None:
+        meta2 /= len(metaoutfits2)
+    if meta1 != None and meta2 != None:
+        outfits_similarity = np.dot(meta1, meta2)
+    else:
+        outfits_similarity = float("inf")
     # Combine similarities (you can adjust the weights based on importance)
     combined_similarity = 0.5 * embedding_similarity + 0.1* metadata_similarity + 0.4* outfits_similarity if outfits_similarity != float("inf") else 0.6 * embedding_similarity + 0.4* metadata_similarity
     return combined_similarity
@@ -110,7 +112,7 @@ def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, me
 
 similarities = []
 
-for e in range(len(loaded_embeddings)):
+for e in range(len(image_embeddings)):
     metadata_similarity_score = calculate_similarity_based_on_metadata(
     image_embeddings[ORIGIN_INDEX],
     image_embeddings[e],
