@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import cv2
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-
+import pickle
 
 
 ORIGIN_INDEX =  10
@@ -26,6 +26,11 @@ with open('datathon/datathon/dataset/outfit_prep_data.csv', newline='') as csvfi
     spamreader = csv.reader(csvfile)
     for row in spamreader:
         outfit_data.append(row)
+
+import pickle
+
+with open('outfit_embeddings.pkl', 'rb') as fp:
+    outfit_embeddings = pickle.load(fp)
 
 images = images[1:]
 dades = dades[1:]
@@ -85,7 +90,7 @@ def display_selection_screen(images):
     pygame.display.flip()
 
 # Get the initial outfit selection from the user
-initial_images = images[500:530]  # Display the first 5 images on the selection screen
+initial_images = images[:30]  # Display the first 5 images on the selection screen
 display_selection_screen(initial_images)
 
 selected_item = None
@@ -105,11 +110,12 @@ while selected_item is None:
                 break
 
 print(selected_item)
-ORIGIN_INDEX = 500+clicked_index
+ORIGIN_INDEX = clicked_index
 
 # Load your image embeddings
 image_embeddings = np.load('image_embeddings_prep.npy')
 
+print("hola")
 outfit_data = outfit_data[1:]
 metadata = dades
 metadata = [m[:9] for m in metadata]
@@ -122,22 +128,51 @@ onehot_encoded = onehot_encoder.fit_transform(categorical_values)
 
 metadata= onehot_encoded
 # Function to calculate similarity between images based on metadata
-def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, metadata2):
+def calculate_similarity_based_on_metadata(embedding1, embedding2, metadata1, metadata2, metaoutfits1, metaoutfits2):
     embedding_similarity = np.dot(embedding1, embedding2)
     metadata_similarity = cosine_similarity([metadata1], [metadata2])[0][0]
 
-    combined_similarity = 0.5 * embedding_similarity + 0.5*metadata_similarity
+    meta1 = [None]
+    for m1 in metaoutfits1:
+        if meta1[0] == None:
+            meta1 = outfit_embeddings[m1]
+        else:
+            meta1 += outfit_embeddings[m1]
+    if meta1[0] != None:
+        meta1 /= len(metaoutfits1)
+    meta2 = [None]
+    for m2 in metaoutfits2:
+        if meta2[0]== None:
+            meta2 = outfit_embeddings[m2]
+        else:
+            meta2 += outfit_embeddings[m2]
+    if meta2[0] != None:
+        meta2 /= len(metaoutfits2)
+    if meta1[0] != None and meta2[0] != None:
+        outfits_similarity = np.dot(meta1, meta2)
+    else:
+        outfits_similarity = float("inf")
+    combined_similarity = 0.3 * embedding_similarity + 0.3*metadata_similarity +0.4*outfits_similarity
     return combined_similarity
 
 similarities = []
 outfit = [ORIGIN_INDEX]
+
+meta_outfits = []
+with open('meta_outfits.csv', newline='') as csvfile:
+    spamreader = csv.reader(csvfile)
+    for row in spamreader:
+        meta_outfits.append(row)
+
 
 for e in range(len(image_embeddings)):
     metadata_similarity_score = calculate_similarity_based_on_metadata(
     image_embeddings[ORIGIN_INDEX],
     image_embeddings[e],
     metadata[ORIGIN_INDEX],
-    metadata[e]
+    metadata[e],
+    meta_outfits[ORIGIN_INDEX],
+    meta_outfits[e]
 )
     similarities.append(metadata_similarity_score)
 
@@ -159,7 +194,7 @@ def check_append(outfit, m, list_removed):
     i = True
     if dades[m][8] in Tipus_roba and dades[m][8] != 'Accesories, Swim and Intimate':
         return False
-    elif dades[m][8] == 'Accesories, Swim and Intimate' and  dades[m][11] == 'Shoes':
+    elif dades[m][8] == 'Accesories, Swim and Intimate' and  dades[m][11] == 'Shoes' and 'Shoes' not in Tipus_roba:
         return True
     for o in outfit:
         if dades[o][8] == dades[m][8]:
