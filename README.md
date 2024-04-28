@@ -42,7 +42,7 @@ En resum, aquest codi està dissenyat per generar i recomanar conjunts de roba b
 
 NOTA: Hi ha una secció, la funció calculate_similarity_based_on_metadata() que està parcialment inacabada. Els pesos dels outfits no són del tot correctes i per tant recomanem no tenir-los en compte. Aleshores, escollirà els outfits basant-se en peçes de roba similars i no tindrà en compte els outfits existents.
 
-ACTUALLITZACIÓ FORA DE TEMPS: Per tal d'arreglar els pesos dels outfits, modificar el fitxer outfit_embed.py tal que la línia 71 és
+ACTUAL·LITZACIÓ FORA DE TEMPS: Per tal d'arreglar els pesos dels outfits, modificar el fitxer outfit_embed.py tal que la línia 71 és
 for outfit_id, count in outfit_counts.items():
     outfit_embeddings[outfit_id]  = outfit_embeddings[outfit_id] /np.linalg.norm(outfit_embeddings[outfit_id] , ord=2, axis=-1, keepdims=True)
 i al fast.py (línia 166), modificar els pesos tal que:
